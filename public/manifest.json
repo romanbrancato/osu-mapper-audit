@@ -1,0 +1,13 @@
+{
+    "name": "osu-mapper-audit",
+    "description": "A chrome extension that allows you to quickly estimate a users' mapping proficiency.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": [
+       "activeTab",
+       "scripting"
+    ],
+    "background": {
+       "service_worker": "background.js"
+    }
+ }
