@@ -1,22 +1,33 @@
 {
-  "name": "osu-mapper-audit",
+  "name": "osu! mapper audit",
   "description": "A Chrome extension that allows you to quickly estimate a users' mapping proficiency.",
   "version": "1.0",
   "manifest_version": 3,
-  "permissions": ["activeTab", "scripting", "storage", "identity"],
+  
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "identity"
+  ],
+  
+  "host_permissions": [
+    "https://osu.ppy.sh/*"
+  ],
+  
   "background": {
     "service_worker": "background.js"
   },
 
-  "host_permissions": ["https://osu.ppy.sh/*"],
   "content_scripts": [
     {
-      "matches": ["https://osu.ppy.sh/beatmapsets*"],
-      "js": ["content_script.js"]
+      "matches": [
+        "https://osu.ppy.sh/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end"
     }
-  ],
-  "oauth2": {
-    "client_id": "YOUR_CLIENT_ID",
-    "scopes": ["public"]
-  }
+  ]
 }

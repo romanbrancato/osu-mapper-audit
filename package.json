@@ -11,6 +11,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/chrome": "^0.0.309",
+    "buffer": "^6.0.3",
     "copy-webpack-plugin": "^13.0.0",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.2",

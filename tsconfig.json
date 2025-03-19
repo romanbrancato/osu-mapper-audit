@@ -1,15 +1,14 @@
 {
     "compilerOptions": {
+       "lib": ["dom", "esnext"],
        "strict": true,
-       "module": "ESNext",
+       "module": "esnext",
        "moduleResolution": "node",
-       "target": "es6",
        "esModuleInterop": true,
        "sourceMap": true,
        "rootDir": "src",
        "outDir": "dist/js",
        "noEmitOnError": true,
-       "types": ["chrome"],
        "typeRoots": [ "node_modules/@types" ]
     }
  }
