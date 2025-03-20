@@ -1,50 +1,57 @@
 import * as osu from "osu-api-v2-js";
 
-const CLIENT_ID = 39099;
-const CLIENT_SECRET = ";
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "auditMapper") {
     (async () => {
       try {
-        const api = await osu.API.createAsync(CLIENT_ID, CLIENT_SECRET);
-        const userId = parseInt(request.userId);
+        const id = parseInt(request.id);
+        const api = request.client.api;
 
-        // Fetch ranked, loved, and graveyard beatmaps in parallel
-        const [ranked, loved, graveyard] = await Promise.all([
-          api.getUserBeatmaps(userId, "ranked"),
-          api.getUserBeatmaps(userId, "loved"),
-          api.getUserBeatmaps(userId, "graveyard", {limit: 10})
+        const [user, ranked, graveyard] = await Promise.all([
+          api.getUser(id),
+          api.getUserBeatmaps(id, "ranked", { limit: 10 }),
+          api.getUserBeatmaps(id, "graveyard", { limit: 100 })
         ]);
-
-        const status = calculateStatus(ranked, loved, graveyard);
-        sendResponse({ status });
+        
+        // const score = calculateScore(user, ranked, graveyard); 
+        const score = Math.floor(Math.random() * 101);
+        sendResponse({ score });
       } catch (error) {
-        if (error instanceof Error) {
-          sendResponse({ error: error.message });
-        } else {
-          sendResponse({ error: String(error) });
+          sendResponse({ error: error });
         }
-      }
     })();
     
-    return true; // Keep message channel open for async response
+    return true;
+  }
+
+  if(request.action === "missingOAuth") {
+    chrome.action.setBadgeText({
+      text: "!"
+    });
+    chrome.action.setBadgeBackgroundColor({
+      color: "#FF0000"
+    });
   }
 });
 
-function calculateStatus(
-  ranked: osu.Beatmapset.Extended.WithBeatmap[],
-  loved: osu.Beatmapset.Extended.WithBeatmap[],
+function calculateScore(
+  user: osu.User.Extended,
+  ranked: osu.Beatmapset.Extended.WithBeatmap[], 
   graveyard: osu.Beatmapset.Extended.WithBeatmap[]
 ) {
-  const rankedAndLovedCount = ranked.length + loved.length;
-  const graveyardCount = graveyard.length;
+  const rank = user.statistics.global_rank;
+  const kudosu = user.kudosu.total;
+  const mapperSubscribers = user.mapping_follower_count;
 
-  if (rankedAndLovedCount >= 1) {
-    return "good";
-  } else if (graveyardCount >= 10) {
-    return "ok";
-  } else {
-    return "bad";
-  }
+  const rankedCount = ranked.length;
+  const guestCount = user.guest_beatmapset_count;
+  const lovedCount = user.loved_beatmapset_count;
+  const graveyardCount = user.graveyard_beatmapset_count;
+  const graveyardFavorites = graveyard.reduce((acc, b) => acc + b.favourite_count, 0);
+  
+  if (rankedCount >= 1 || lovedCount >= 1 || guestCount >= 3 || mapperSubscribers >= 50) return "good";
+
+  if (mapperSubscribers >= 10 || guestCount >=1) return "ok"
+
+  return "bad";
 }
