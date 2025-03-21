@@ -10,6 +10,7 @@ module.exports = {
     background: path.resolve(__dirname, "..", "src", "background.ts"),
     content: path.resolve(__dirname, "..", "src", "content.ts"),
     auditor: path.resolve(__dirname, "..", "src", "auditor.ts"),
+    score: path.resolve(__dirname, "..", "src", "score.ts"),
   },
   output: {
     path: path.join(__dirname, "../dist"),

@@ -1,18 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const oauthForm = document.getElementById('oauthForm') as HTMLFormElement;
     const clientIdInput = document.getElementById('clientId') as HTMLInputElement;
     const clientSecretInput = document.getElementById('clientSecret') as HTMLInputElement;
-    const saveButton = document.getElementById('saveCredentials');
-
-    // Load saved credentials from localStorage
-    const savedOAuthData = localStorage.getItem('osuMapperAuditOAuth');
     
-    if (savedOAuthData) {
-        const parsedData = JSON.parse(savedOAuthData);
-        if (parsedData.clientId) clientIdInput.value = parsedData.clientId;
-        if (parsedData.clientSecret) clientSecretInput.value = parsedData.clientSecret;
-    }
-
-    saveButton?.addEventListener('click', (e) => {
+    // Load saved credentials from chrome.storage.local
+    chrome.storage.local.get(['osuMapperAuditOAuth'], (result) => {
+        const savedOAuthData = result.osuMapperAuditOAuth;
+        
+        if (savedOAuthData) {
+            if (savedOAuthData.clientId) clientIdInput.value = savedOAuthData.clientId;
+            if (savedOAuthData.clientSecret) clientSecretInput.value = savedOAuthData.clientSecret;
+        }
+    });
+    
+    oauthForm?.addEventListener('submit', (e) => {
         e.preventDefault();
         
         const clientId = clientIdInput.value;
@@ -22,9 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
             clientId,
             clientSecret
         };
-
-        localStorage.setItem('osuMapperAuditOAuth', JSON.stringify(oAuthData));
         
-        window.close();
+        // Save to chrome.storage.local
+        chrome.storage.local.set({ osuMapperAuditOAuth: oAuthData }, () => {
+            alert('OAuth credentials saved successfully!');
+            // window.close();
+        });
     });
 });

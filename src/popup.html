@@ -1,147 +1,210 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>osu! mapper audit</title>
+    <title>osu! Mapper Audit</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <style>
-        /* Base styles */
-        * {
-          box-sizing: border-box;
-        }
-  
-        body {
-          font-family: "Exo 2", "Segoe UI", sans-serif;
-          width: 350px;
-          max-height: 800px;
-          overflow-y: auto;
-          padding: 20px;
-          background: #171a1c;
-          color: white;
-          margin: 0;
-        }
-  
-        .container {
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-  
-        /* Typography */
-        h2 {
-          font-size: 1.4em;
-          margin: 0 0 10px 0;
-          font-weight: 600;
-          letter-spacing: 0.5px;
-          position: relative;
-          padding-left: 12px;
-        }
-  
-        h2:before {
-          content: "";
-          position: absolute;
-          left: 0;
-          margin-top: 0.4em;
-          height: 0.65em;
-          width: 3px;
-          background-color: #b8d3e0;
-          border-radius: 10000px;
-        }
-  
-        a {
-          color: #b8d3e0 !important;
-          text-decoration: none;
-          font-weight: 600;
-        }
-  
-        a:hover {
-          text-decoration: underline;
-        }
-  
-        /* Form elements */
-        .input-container {
-          position: relative;
-        }
-  
-        .input-container__label {
-          position: absolute;
-          padding: 7px;
-          font-size: 12px;
-          font-weight: 900;
-          line-height: 1.25;
-          color: white;
-          pointer-events: none;
-        }
-  
-        .input-text {
-          width: 100%;
-          padding: 25px 7px 8px;
-          background: #454f54;
-          border: 2px solid transparent;
-          border-radius: 5px;
-          color: #fff;
-          font-family: "Exo 2", sans-serif;
-          font-size: 14px;
-        }
-  
-        .input-text:hover {
-          border-color: #b8d3e0;
-        }
-  
-        .input-text:focus {
-          border-color: white;
-          outline: none;
-        }
-  
-        button {
-          margin-top: 20px;
-          padding: 12px 20px;
-          background: #394246;
-          color: white;
-          border: 1px solid #394246;
-          border-radius: 25px;
-          font-family: inherit;
-          font-weight: 900;
-          letter-spacing: 0.5px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-  
-        button:hover {
-          background: #5d6569;
-        }
-  
-        /* Footer */
-        .footer-text {
-          margin-top: 15px;
-          font-size: 12px;
-          font-weight: 500;
-          color: #888888;
-          text-align: center;
-        }
-      </style>
+      body {
+        font-family: "Exo 2", sans-serif;
+        background-color: #22282a;
+        color: #fff;
+        width: 450px;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+      }
+
+      a {
+        color: #b8d3e0 !important;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 12px;
+        color: #888888;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      header {
+        font-size: 1.4em;
+        padding: 20px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        position: relative;
+      }
+
+      header:before {
+        background-color: #b8d3e0;
+        border-radius: 10000px;
+        bottom: -3px;
+        content: "";
+        display: block;
+        height: 4px;
+        position: absolute;
+        width: 115px;
+        z-index: 1;
+      }
+
+      .section {
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+      }
+
+      .section-header {
+        background-color: #171a1c;
+        padding: 20px 50px 0 20px;
+        width: 100px;
+      }
+
+      h2 {
+        font-size: 1.2em;
+        margin: 0;
+        font-weight: 500;
+        text-overflow: clip;
+      }
+
+      .section-content {
+        padding: 0;
+        width: 350px;
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+      }
+
+      .group {
+        padding: 10px;
+        background-color: #2e3538;
+      }
+
+      .input-container {
+        padding: 10px 0;
+        margin-right: 20px;
+      }
+
+      .input-container-label {
+        display: block;
+        margin-bottom: 5px;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .input {
+        width: 100%;
+        padding: 5px;
+        background-color: #454f54;
+        border: none;
+        border-radius: 3px;
+        color: white;
+        font-family: inherit;
+        font-weight: 400;
+        box-sizing: border-box;
+        border: 2px solid #454f54;
+      }
+
+      .input:focus {
+        outline: none;
+        border: 2px solid white;
+      }
+
+      button {
+        background: none;
+        color: #ffcd53;
+        border: none;
+        padding: 0;
+        margin: 0;
+        font-family: "Exo 2", sans-serif;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
   <body>
-    <div class="container">
-      <h2>osu! mapper audit</h2>
-      <label class="input-container">
-        <span class="input-container__label">Client ID</span>
-        <input id="clientId" type="text" pattern="\d{5}" maxlength="5" class="input-text" required />
-      </label>
-      <label class="input-container">
-        <span class="input-container__label">Client Secret</span>
-        <input id="clientSecret" type="password" maxlength="40" class="input-text" required />
-      </label>
-      <button id="saveCredentials">Save Credentials</button>
-      <div class="footer-text">
-        Get your OAuth credentials from<br />
-        <a href="https://osu.ppy.sh/home/account/edit#oauth" target="_blank">
-          osu! account settings
-        </a>
+    <header>osu! mapper audit</header>
+    <!-- OAuth Section -->
+    <div class="section">
+      <div class="section-header">
+        <h2>OAuth</h2>
+      </div>
+      <div class="section-content">
+        <div class="group">
+          <form id="oauthForm">
+          <div class="input-container">
+            <label class="input-container-label">client id</label>
+            <input class="input" id="clientId" name="clientId" required />
+          </div>
+          <div class="input-container">
+            <label class="input-container-label" >client secret</label>
+            <input
+              type="password"
+              class="input"
+              id="clientSecret" 
+              name="clientSecret"
+              required
+            />
+          </div>
+          <a href="https://osu.ppy.sh/home/account/edit#oauth" target="_blank">
+            osu! oauth settings
+          </a>
+        </form>
+        </div>
+        <div class="group">
+          <button type="submit" form="oauthForm">update</button>
+        </div>
       </div>
     </div>
-    <script src="popup.js"></script>
+
+    <!-- Weights Section -->
+    <div class="section">
+      <div class="section-header">
+        <h2>Weights</h2>
+      </div>
+      <div class="section-content">
+        <div class="group">
+          <div class="input-container">
+            <label class="input-container-label">has leaderboard</label>
+            <input
+              type="number"
+              class="input"
+              min="0"
+              name="has leaderboard"
+              required
+            />
+          </div>
+        </div>
+        <div class="group">
+          <div class="input-container">
+            <label class="input-container-label">graveyard favorites</label>
+            <input
+              type="number"
+              class="input"
+              min="0"
+              name="graveyard favorites"
+              required
+            />
+          </div>
+        </div>
+        <div class="group">
+          <div class="input-container">
+            <label class="input-container-label">kudosu</label>
+            <input type="number" class="input" min="0" name="kudosu" required />
+          </div>
+        </div>
+        <div class="group">
+          <button type="submit">update</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
