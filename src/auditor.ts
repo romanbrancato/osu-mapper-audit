@@ -34,7 +34,7 @@ export class Auditor {
   }
 
   // Sends a request to audit a mapper and returns their score
-  async auditMapper(id: string): Promise<{ score: number }> {
+  async auditMapper(id: string): Promise<{ mapper: string, score: number, report: Record<string, string> }> {
     const response = await chrome.runtime.sendMessage({
       action: "auditMapper",
       id,
@@ -48,6 +48,6 @@ export class Auditor {
       throw new Error(response.error);
     }
 
-    return { score: response.score };
+    return { ...response };
   }
 }

@@ -24,7 +24,6 @@
         text-decoration: none;
         font-weight: 600;
         font-size: 12px;
-        color: #888888;
       }
 
       a:hover {
@@ -100,7 +99,6 @@
         width: 100%;
         padding: 5px;
         background-color: #454f54;
-        border: none;
         border-radius: 3px;
         color: white;
         font-family: inherit;
@@ -123,10 +121,21 @@
         font-family: "Exo 2", sans-serif;
         font-size: 12px;
         cursor: pointer;
+        vertical-align: middle;
       }
 
       button:hover {
         text-decoration: underline;
+      }
+
+      #save-confirmation {
+        color: #ffcd53;
+        font-family: "Exo 2", sans-serif;
+        font-size: 12px;
+        margin-left: 8px;
+        display: none;
+        vertical-align: middle;
+        line-height: 1;
       }
     </style>
   </head>
@@ -161,6 +170,7 @@
         </div>
         <div class="group">
           <button type="submit" form="oauthForm">update</button>
+          <span id="save-confirmation">&#10003</span>
         </div>
       </div>
     </div>

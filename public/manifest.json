@@ -5,15 +5,14 @@
   "manifest_version": 3,
   
   "permissions": [
-    "activeTab",
     "scripting",
     "storage",
-    "identity",
+    "unlimitedStorage",
     "action"
   ],
   
   "host_permissions": [
-    "https://osu.ppy.sh/*"
+    "*://*.ppy.sh/*"
   ],
 
   "action": {
@@ -27,7 +26,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://osu.ppy.sh/*"
+        "*://*.ppy.sh/*"
       ],
       "js": [
         "content.js"

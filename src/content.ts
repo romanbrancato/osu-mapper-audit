@@ -1,139 +1,123 @@
 import { Auditor } from "./auditor";
 
+const DEBOUNCE_DELAY = 100;
+const STORAGE_PREFIX = 'mapper_';
+const COLOR_STOPS = [
+    [0.0, 0, 0, 0],    // Black
+    [0.33, 255, 0, 0], // Red
+    [0.66, 255, 255, 0], // Yellow
+    [1.0, 0, 255, 0],  // Green
+] as const;
+
+
 (async function main() {
-  let auditor: Auditor;
+    let auditor: Auditor;
 
-  try {
-    auditor = await Auditor.create();
-  } catch (error) {
-    chrome.runtime.sendMessage({
-      action: "missingOAuth",
-    });
-    return; 
-  }
-  function addAuditButtons() {
-    document
-      .querySelectorAll(".beatmapset-panel__info-row--mapper")
-      .forEach((row) => {
-        if (row.querySelector(".audit-button")) return;
+    try {
+        auditor = await Auditor.create();
+    } catch (error) {
+        await chrome.runtime.sendMessage({ action: "missingOAuth" });
+        return;
+    }
 
+    function updateUserColor(id: string, color: string) {
+        document.querySelectorAll(`a.js-usercard[data-user-id="${id}"]`).forEach(link => {
+            (link as HTMLElement).style.color = color;
+        });
+    }
+
+    function createAuditButton(): HTMLButtonElement {
         const button = document.createElement("button");
         button.className = "audit-button beatmapset-panel__mapper-link u-hover";
         button.textContent = "?";
         Object.assign(button.style, {
-          marginLeft: "8px",
-          cursor: "pointer",
-          background: "none",
-          border: "none",
-          padding: "0",
+            marginLeft: "8px",
+            cursor: "pointer",
+            background: "none",
+            border: "none",
+            padding: "0",
         });
-
-        button.addEventListener("click", async () => {
-          const row = button.closest(".beatmapset-panel__info-row--mapper");
-          const userLink = row?.querySelector<HTMLAnchorElement>(
-            "a.js-usercard[data-user-id]"
-          );
-          const id = userLink?.dataset.userId;
-    
-          if (!id) return;
-          
-          button.textContent = "...";
-          button.disabled = true;
-          
-          try {
-            const response = await auditor.auditMapper(id);
-            const color = getGradientColor(response.score);
-            
-            document
-              .querySelectorAll(`a.js-usercard[data-user-id="${id}"]`)
-              .forEach((link) => {
-                (link as HTMLElement).style.color = color;
-              });
-              
-            button.textContent = `(${response.score}) ↻`;
-            localStorage.setItem(`mapper_${id}`, JSON.stringify({
-              score: response.score,
-              color
-            }));
-          } catch (error) {
-            console.error(error);
-            button.textContent = "!";
-          } finally {
-            button.disabled = false;
-          }
-        });
-
-        // Hover Effects
-        button.addEventListener("mouseenter", () => {
-          button.style.textDecoration = "underline";
-        });
-
-        button.addEventListener("mouseleave", () => {
-          button.style.textDecoration = "none";
-        });
-
-        const userId = row
-          .querySelector("a.js-usercard[data-user-id]")
-          ?.getAttribute("data-user-id");
-        if (userId) {
-          const storedData = localStorage.getItem(`mapper_${userId}`);
-          if (storedData) {
-            const { score, color } = JSON.parse(storedData);
-            button.textContent = `(${score}) ↻`;
-            document
-              .querySelectorAll(`a.js-usercard[data-user-id="${userId}"]`)
-              .forEach((link) => ((link as HTMLElement).style.color = color));
-          }
-        }
-
-        row.appendChild(button);
-      });
-  }
-
-  addAuditButtons();
-
-  function getGradientColor(score: number): string {
-    const clamped = Math.max(0, Math.min(100, score));
-    const pos = clamped / 100;
-
-    // Color stops: [position, R, G, B]
-    const stops = [
-      [0.0, 0, 0, 0], // Black
-      [0.33, 255, 0, 0], // Red
-      [0.66, 255, 255, 0], // Yellow
-      [1.0, 0, 255, 0], // Green
-    ];
-
-    // Find surrounding stops
-    let [start, end] = [stops[0], stops[stops.length - 1]];
-    for (let i = 0; i < stops.length - 1; i++) {
-      if (pos >= stops[i][0] && pos <= stops[i + 1][0]) {
-        [start, end] = [stops[i], stops[i + 1]];
-        break;
-      }
+        return button;
     }
 
-    // Interpolate between stops
-    const t = (pos - start[0]) / (end[0] - start[0]);
-    const [r, g, b] = start
-      .slice(1)
-      .map((c, i) => Math.round(c + t * (end[i + 1] - c)));
+    function addAuditButtons() {
+        document.querySelectorAll<HTMLElement>(".beatmapset-panel__info-row--mapper:not([data-audit-processed])").forEach(row => {
+            const userLink = row.querySelector<HTMLAnchorElement>("a.js-usercard[data-user-id]");
+            const id = userLink?.dataset.userId;
+            if (!id) return;
 
-    return `#${[r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("")}`;
-  }
+            const button = createAuditButton();
 
-  function debounce(
-    func: (...args: any[]) => void,
-    delay: number
-  ): (...args: any[]) => void {
-    let timeoutId: number;
-    return function (...args: any[]) {
-      clearTimeout(timeoutId);
-      timeoutId = window.setTimeout(() => func(...args), delay);
-    };
-  }
-  new MutationObserver(debounce(addAuditButtons, 100)).observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
+            // Event handlers
+            const hoverHandler = (state: string) => () => button.style.textDecoration = state;
+            button.addEventListener("mouseenter", hoverHandler("underline"));
+            button.addEventListener("mouseleave", hoverHandler("none"));
+
+            button.addEventListener("click", async () => {
+                button.textContent = "...";
+                button.disabled = true;
+
+                try {
+                    const response = await auditor.auditMapper(id);
+                    console.log(JSON.stringify(response, null, 2));
+
+                    const color = getColorFromGradient(response.score);
+
+                    updateUserColor(id, color);
+                    button.textContent = `(${response.score}) ↻`;
+                    localStorage.setItem(`${STORAGE_PREFIX}${id}`, response.score.toString());
+                } catch (error) {
+                    button.textContent = "!";
+                } finally {
+                    button.disabled = false;
+                }
+            });
+
+            // Load stored data
+            const storedScore = localStorage.getItem(`${STORAGE_PREFIX}${id}`);
+            if (storedScore) {
+                const score = parseInt(storedScore, 10);
+                const color = getColorFromGradient(score);
+                button.textContent = `(${score}) ↻`;
+                updateUserColor(id, color);
+            }
+
+            row.appendChild(button);
+            row.dataset.auditProcessed = "true";
+        });
+    }
+
+    function getColorFromGradient(score: number): string {
+        const pos = Math.max(0, Math.min(1, score / 100));
+        let start: readonly [number, number, number, number], end: readonly [number, number, number, number];
+
+        if (pos <= 0.33) {
+            [start, end] = [COLOR_STOPS[0], COLOR_STOPS[1]];
+        } else if (pos <= 0.66) {
+            [start, end] = [COLOR_STOPS[1], COLOR_STOPS[2]];
+        } else {
+            [start, end] = [COLOR_STOPS[2], COLOR_STOPS[3]];
+        }
+
+        const t = (pos - start[0]) / (end[0] - start[0]);
+        const r = Math.round(start[1] + t * (end[1] - start[1]));
+        const g = Math.round(start[2] + t * (end[2] - start[2]));
+        const b = Math.round(start[3] + t * (end[3] - start[3]));
+
+        return `#${[r, g, b].map(c => c.toString(16).padStart(2, "0")).join("")}`;
+    }
+
+    function debounce<T extends (...args: any[]) => void>(fn: T, delay: number): T {
+        let timeoutId: number;
+        return ((...args: Parameters<T>) => {
+            clearTimeout(timeoutId);
+            timeoutId = window.setTimeout(() => fn(...args), delay);
+        }) as T;
+    }
+
+    addAuditButtons();
+    new MutationObserver(debounce(addAuditButtons, DEBOUNCE_DELAY)).observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
 })();
