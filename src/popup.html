@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>osu! Mapper Audit</title>
+    <title>osu! mapper audit</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600&display=swap"
       rel="stylesheet"
@@ -10,8 +10,8 @@
       body {
         font-family: "Exo 2", sans-serif;
         background-color: #22282a;
-        color: #fff;
-        width: 450px;
+        color: white;
+        width: 40em;
         margin: 0;
         padding: 0;
         display: flex;
@@ -22,8 +22,6 @@
       a {
         color: #b8d3e0 !important;
         text-decoration: none;
-        font-weight: 600;
-        font-size: 12px;
       }
 
       a:hover {
@@ -31,11 +29,14 @@
       }
 
       header {
-        font-size: 1.4em;
-        padding: 20px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        position: relative;
+        padding: 1.5em;
+        position: sticky;
+        top: 0;
+        backdrop-filter: blur(5em);
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
 
       header:before {
@@ -44,70 +45,23 @@
         bottom: -3px;
         content: "";
         display: block;
-        height: 4px;
+        height: 5px;
         position: absolute;
-        width: 115px;
+        width: 8em;
         z-index: 1;
       }
 
-      .section {
-        padding: 0;
-        display: flex;
-        flex-direction: row;
-      }
-
-      .section-header {
-        background-color: #171a1c;
-        padding: 20px 50px 0 20px;
-        width: 100px;
-      }
-
-      h2 {
-        font-size: 1.2em;
-        margin: 0;
-        font-weight: 500;
-        text-overflow: clip;
-      }
-
-      .section-content {
-        padding: 0;
-        width: 350px;
-        display: flex;
-        flex-direction: column;
-        gap: 1px;
-      }
-
-      .group {
-        padding: 10px;
-        background-color: #2e3538;
-      }
-
-      .input-container {
-        padding: 10px 0;
-        margin-right: 20px;
-      }
-
-      .input-container-label {
-        display: block;
-        margin-bottom: 5px;
-        font-family: inherit;
-        font-size: 12px;
-        font-weight: 700;
-      }
-
-      .input {
+      input {
         width: 100%;
-        padding: 5px;
+        padding: 3px;
         background-color: #454f54;
         border-radius: 3px;
         color: white;
-        font-family: inherit;
-        font-weight: 400;
         box-sizing: border-box;
         border: 2px solid #454f54;
       }
 
-      .input:focus {
+      input:focus {
         outline: none;
         border: 2px solid white;
       }
@@ -118,103 +72,357 @@
         border: none;
         padding: 0;
         margin: 0;
-        font-family: "Exo 2", sans-serif;
-        font-size: 12px;
         cursor: pointer;
-        vertical-align: middle;
+        font: inherit;
       }
 
       button:hover {
         text-decoration: underline;
       }
 
-      #save-confirmation {
-        color: #ffcd53;
-        font-family: "Exo 2", sans-serif;
-        font-size: 12px;
-        margin-left: 8px;
-        display: none;
-        vertical-align: middle;
-        line-height: 1;
+      .section {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+      }
+
+      .section-header {
+        background-color: #171a1c;
+        padding: 2em 5em 0 2em;
+      }
+
+      .section-header-text {
+        position: sticky;
+        top: 80px;
+      }
+
+      .section-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        color: #dbe9f0;
+      }
+
+      .group {
+        padding: 1em;
+        background-color: #2e3538;
+      }
+
+      .input-container {
+        padding: 0.5em 2em 0.5em 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5em;
+      }
+
+      .param-container {
+        display: grid;
+        grid-template-columns: 2fr 2fr;
+        white-space: nowrap;
+        line-height: 2em;
+        gap: 2em;
+      }
+
+      .param-input-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        color: #aaaeb1;
+        gap: 0.5em;
+      }
+
+      .submit-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      #oauthStatus {
+        pointer-events: none;
+      }
+
+      #github-link {
+        color: white !important;
       }
     </style>
   </head>
   <body>
-    <header>osu! mapper audit</header>
+    <header>
+      osu! mapper audit
+      <a
+        href="https://github.com/romanbrancato/osu-mapper-audit"
+        target="_blank"
+        id="github-link"
+      >
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 15 15"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M7.49933 0.25C3.49635 0.25 0.25 3.49593 0.25 7.50024C0.25 10.703 2.32715 13.4206 5.2081 14.3797C5.57084 14.446 5.70302 14.2222 5.70302 14.0299C5.70302 13.8576 5.69679 13.4019 5.69323 12.797C3.67661 13.235 3.25112 11.825 3.25112 11.825C2.92132 10.9874 2.44599 10.7644 2.44599 10.7644C1.78773 10.3149 2.49584 10.3238 2.49584 10.3238C3.22353 10.375 3.60629 11.0711 3.60629 11.0711C4.25298 12.1788 5.30335 11.8588 5.71638 11.6732C5.78225 11.205 5.96962 10.8854 6.17658 10.7043C4.56675 10.5209 2.87415 9.89918 2.87415 7.12104C2.87415 6.32925 3.15677 5.68257 3.62053 5.17563C3.54576 4.99226 3.29697 4.25521 3.69174 3.25691C3.69174 3.25691 4.30015 3.06196 5.68522 3.99973C6.26337 3.83906 6.8838 3.75895 7.50022 3.75583C8.1162 3.75895 8.73619 3.83906 9.31523 3.99973C10.6994 3.06196 11.3069 3.25691 11.3069 3.25691C11.7026 4.25521 11.4538 4.99226 11.3795 5.17563C11.8441 5.68257 12.1245 6.32925 12.1245 7.12104C12.1245 9.9063 10.4292 10.5192 8.81452 10.6985C9.07444 10.9224 9.30633 11.3648 9.30633 12.0413C9.30633 13.0102 9.29742 13.7922 9.29742 14.0299C9.29742 14.2239 9.42828 14.4496 9.79591 14.3788C12.6746 13.4179 14.75 10.7025 14.75 7.50024C14.75 3.49593 11.5036 0.25 7.49933 0.25Z"
+            fill="currentColor"
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+          ></path>
+        </svg>
+      </a>
+    </header>
+
     <!-- OAuth Section -->
     <div class="section">
       <div class="section-header">
-        <h2>OAuth</h2>
+        <label class="section-header-text">OAuth</label>
       </div>
-      <div class="section-content">
+      <form id="oauthForm" class="section-content">
         <div class="group">
-          <form id="oauthForm">
           <div class="input-container">
-            <label class="input-container-label">client id</label>
-            <input class="input" id="clientId" name="clientId" required />
+            <label>client id</label>
+            <input id="clientId" name="clientId" required />
           </div>
           <div class="input-container">
-            <label class="input-container-label" >client secret</label>
+            <label>client secret</label>
             <input
               type="password"
-              class="input"
-              id="clientSecret" 
+              id="clientSecret"
               name="clientSecret"
               required
             />
+            <a
+              href="https://osu.ppy.sh/home/account/edit#oauth"
+              target="_blank"
+            >
+              osu! oauth settings
+            </a>
           </div>
-          <a href="https://osu.ppy.sh/home/account/edit#oauth" target="_blank">
-            osu! oauth settings
-          </a>
-        </form>
         </div>
-        <div class="group">
-          <button type="submit" form="oauthForm">update</button>
-          <span id="save-confirmation">&#10003</span>
+        <div class="group submit-group">
+          <button type="submit">update</button>
+          <span id="oauthStatus"></span>
         </div>
-      </div>
+      </form>
     </div>
 
-    <!-- Weights Section -->
+    <!-- Parameters Section -->
     <div class="section">
       <div class="section-header">
-        <h2>Weights</h2>
+        <label class="section-header-text">Parameters</label>
       </div>
-      <div class="section-content">
-        <div class="group">
-          <div class="input-container">
-            <label class="input-container-label">has leaderboard</label>
+      <form id="paramsForm" class="section-content">
+        <!-- Has Leaderboard Count -->
+        <div class="group param-container">
+          has leaderboard count
+          <div class="param-input-container">
             <input
               type="number"
-              class="input"
               min="0"
-              name="has leaderboard"
+              step="0.1"
+              name="hasLeaderboardCount_weight"
               required
             />
-          </div>
-        </div>
-        <div class="group">
-          <div class="input-container">
-            <label class="input-container-label">graveyard favorites</label>
+            <label>weight</label>
             <input
               type="number"
-              class="input"
               min="0"
-              name="graveyard favorites"
+              name="hasLeaderboardCount_midpoint"
               required
             />
+            <label>mid point</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="hasLeaderboardCount_steepness"
+              required
+            />
+            <label>steepness</label>
           </div>
         </div>
-        <div class="group">
-          <div class="input-container">
-            <label class="input-container-label">kudosu</label>
-            <input type="number" class="input" min="0" name="kudosu" required />
+
+        <!-- Average Graveyard Play Count -->
+        <div class="group param-container">
+          average graveyard plays
+          <div class="param-input-container">
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              name="averageGraveyardPlayCount_weight"
+              required
+            />
+            <label>weight</label>
+            <input
+              type="number"
+              min="0"
+              name="averageGraveyardPlayCount_midpoint"
+              required
+            />
+            <label>mid point</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="averageGraveyardPlayCount_steepness"
+              required
+            />
+            <label>steepness</label>
           </div>
         </div>
+
+        <!-- Graveyard Count -->
+        <div class="group param-container">
+          graveyard count
+          <div class="param-input-container">
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              name="graveyardCount_weight"
+              required
+            />
+            <label>weight</label>
+            <input
+              type="number"
+              min="0"
+              name="graveyardCount_midpoint"
+              required
+            />
+            <label>mid point</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="graveyardCount_steepness"
+              required
+            />
+            <label>steepness</label>
+          </div>
+        </div>
+
+        <!-- Graveyard Favorites -->
+        <div class="group param-container">
+          graveyard favorites
+          <div class="param-input-container">
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              name="graveyardFavorites_weight"
+              required
+            />
+            <label>weight</label>
+            <input
+              type="number"
+              min="0"
+              name="graveyardFavorites_midpoint"
+              required
+            />
+            <label>mid point</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="graveyardFavorites_steepness"
+              required
+            />
+            <label>steepness</label>
+          </div>
+        </div>
+
+        <!-- Kudosu -->
+        <div class="group param-container">
+          kudosu
+          <div class="param-input-container">
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              name="kudosu_weight"
+              required
+            />
+            <label>weight</label>
+            <input
+              type="number"
+              min="0"
+              name="kudosu_midpoint"
+              required
+            />
+            <label>mid point</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="kudosu_steepness"
+              required
+            />
+            <label>steepness</label>
+          </div>
+        </div>
+
+        <!-- Mapping Subscribers -->
+        <div class="group param-container">
+          mapping subscribers
+          <div class="param-input-container">
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              name="mappingSubscribers_weight"
+              required
+            />
+            <label>weight</label>
+            <input
+              type="number"
+              min="0"
+              name="mappingSubscribers_midpoint"
+              required
+            />
+            <label>mid point</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="mappingSubscribers_steepness"
+              required
+            />
+            <label>steepness</label>
+          </div>
+        </div>
+
+        <!-- PP -->
+        <div class="group param-container">
+          pp
+          <div class="param-input-container">
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              name="pp_weight"
+              required
+            />
+            <label>weight</label>
+            <input
+              type="number"
+              min="0"
+              name="pp_midpoint"
+              required
+            />
+            <label>mid point</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              name="pp_steepness"
+              required
+            />
+            <label>steepness</label>
+          </div>
+        </div>
+
         <div class="group">
           <button type="submit">update</button>
         </div>
-      </div>
+      </form>
     </div>
   </body>
 </html>

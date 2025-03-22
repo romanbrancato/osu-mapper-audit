@@ -1,69 +1,64 @@
-type Parameter = {
-    name: string;
-    weight: number;
-    midpoint: number;
-    steepness: number;
-};
+export type Param = { weight: number, midpoint: number, steepness: number };
 
-export const parameters: Parameter[] = [
-    {
-        name: 'hasLeaderboardCount',
+export const defaults: Record<string, Param> = {
+    hasLeaderboardCount: {
         weight: 1,
         midpoint: 2,
         steepness: 0.3,
     },
-    {
-       name: 'averageGraveyardPlayCount',
+    averageGraveyardPlayCount: {
         weight: 1,
         midpoint: 100,
         steepness: 0.1,
     },
-    {
-        name: 'graveyardCount',
-        weight: 1, 
+    graveyardCount: {
+        weight: 1,
         midpoint: 10,
         steepness: 0.3,
     },
-    {
-        name: 'graveyardFavorites',
+    graveyardFavorites: {
         weight: 1,
         midpoint: 100,
         steepness: 0.1,
     },
-    {
-        name: 'kudosu',
+    kudosu: {
         weight: 1,
         midpoint: 50,
-        steepness: 0.1
+        steepness: 0.1,
     },
-    {
-        name: 'mappingSubs',
+    mappingSubscribers: {
         weight: 1,
         midpoint: 50,
-        steepness: 0.1
+        steepness: 0.1,
     },
-    {
-        name: 'pp',
+    pp: {
         weight: 1,
         midpoint: 8000,
-        steepness: 0.01
-    }
-];
-export function calculateScore(params: Parameter[], mapperValues: Record<string, number>): {score: number, report: Record<string, string>} {
+        steepness: 0.01,
+    },
+};
+
+export type Params = typeof defaults;
+
+export function calculateScore(params: Params, mapperValues: Record<string, number>): {score: number, report: Record<string, string>} {
     let weightedSquaresSum = 0;
     let weightsSquaredSum = 0;
 
     const report: Record<string, string> = {}
 
-    for (const param of params.filter(param => param.weight > 0)) {
-        const raw = mapperValues[param.name] || 0;
-        const scaled = 100 / (1 + Math.exp(-param.steepness * (raw - param.midpoint)));
-        const weighted = scaled * param.weight;
+    for (const key in params) {
+        const param = params[key];
 
-        report[param.name] = `${raw} -> ${Math.ceil(scaled)} raw -> ${Math.ceil(weighted)} weighted`;
+        if (param.weight > 0) {
+            const raw = mapperValues[key] || 0;
+            const scaled = 100 / (1 + Math.exp(-param.steepness * (raw - param.midpoint)));
+            const weighted = scaled * param.weight;
 
-        weightedSquaresSum += weighted ** 2;
-        weightsSquaredSum += param.weight ** 2;
+            report[key] = `${raw} -> ${Math.ceil(scaled)} raw -> ${Math.ceil(weighted)} weighted`;
+
+            weightedSquaresSum += weighted ** 2;
+            weightsSquaredSum += param.weight ** 2;
+        }
     }
 
     if (weightsSquaredSum === 0) return {score: 0, report}; // Prevent division by zero
@@ -73,6 +68,7 @@ export function calculateScore(params: Parameter[], mapperValues: Record<string,
 
     return {score: Math.min(100, Math.max(0, Math.ceil(score))), report};
 }
+
 
 
 
