@@ -1,44 +1,4 @@
-export type Param = { weight: number, midpoint: number, steepness: number };
-
-export const defaults: Record<string, Param> = {
-    hasLeaderboardCount: {
-        weight: 1,
-        midpoint: 2,
-        steepness: 0.3,
-    },
-    averageGraveyardPlayCount: {
-        weight: 1,
-        midpoint: 100,
-        steepness: 0.1,
-    },
-    graveyardCount: {
-        weight: 1,
-        midpoint: 10,
-        steepness: 0.3,
-    },
-    graveyardFavorites: {
-        weight: 1,
-        midpoint: 100,
-        steepness: 0.1,
-    },
-    kudosu: {
-        weight: 1,
-        midpoint: 50,
-        steepness: 0.1,
-    },
-    mappingSubscribers: {
-        weight: 1,
-        midpoint: 50,
-        steepness: 0.1,
-    },
-    pp: {
-        weight: 1,
-        midpoint: 8000,
-        steepness: 0.01,
-    },
-};
-
-export type Params = typeof defaults;
+import { Params } from './types';
 
 export function calculateScore(params: Params, mapperValues: Record<string, number>): {score: number, report: Record<string, string>} {
     let weightedSquaresSum = 0;

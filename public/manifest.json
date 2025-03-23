@@ -8,7 +8,8 @@
     "scripting",
     "storage",
     "unlimitedStorage",
-    "action"
+    "action",
+    "webNavigation"
   ],
   
   "host_permissions": [

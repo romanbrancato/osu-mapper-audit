@@ -1,88 +1,141 @@
-import { Param, Params, defaults } from "./score";
+import { Params, defaultParams, OAuth, Colors, defaultColors, Display } from "./types";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const oauthForm = document.getElementById("oauthForm") as HTMLFormElement;
-  const paramsForm = document.getElementById("paramsForm") as HTMLFormElement;
-  const clientIdInput = document.getElementById("clientId") as HTMLInputElement;
-  const clientSecretInput = document.getElementById(
-    "clientSecret"
-  ) as HTMLInputElement;
+type StorageData = {
+  auditOAuth?: OAuth;
+  auditParameters?: Params;
+  auditDisplay?: Display;
+};
 
-  // Load saved credentials
-  const { auditOAuth } = await chrome.storage.local.get(["auditOAuth"]);
-if (auditOAuth) {
-  clientIdInput.value = auditOAuth.clientId || "";
-  clientSecretInput.value = auditOAuth.clientSecret || "";
-}
+const rgbToHex = (rgb: number[]): string => 
+  `#${rgb.map(v => v.toString(16).padStart(2, '0')).join('')}`;
 
-  // Load saved parameters
-  const { auditParameters } = await chrome.storage.local.get("auditParameters");
-  const params: Params = auditParameters || defaults;
+const hexToRgb = (hex: string): number[] => {
+  const bigint = parseInt(hex.slice(1), 16);
+  return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+};
 
+async function initialize() {
+  const { auditOAuth, auditParameters, auditDisplay } = await chrome.storage.local.get([
+    'auditOAuth', 'auditParameters', 'auditDisplay'
+  ]) as StorageData;
+
+  // Initialize OAuth form
+  const oauthForm = document.getElementById('oauthForm')!;
+  (oauthForm.querySelector('[name="clientId"]') as HTMLInputElement).value = auditOAuth?.clientId || '';
+  (oauthForm.querySelector('[name="clientSecret"]') as HTMLInputElement).value = auditOAuth?.clientSecret || '';
+
+  // Initialize parameters form
+  const params = auditParameters || defaultParams;
   Object.entries(params).forEach(([name, values]) => {
     Object.entries(values).forEach(([key, value]) => {
-      const input = document.querySelector<HTMLInputElement>(
-        `[name="${name}_${key}"]`
-      );
+      const input = document.querySelector<HTMLInputElement>(`[name="${name}_${key}"]`);
       if (input) input.value = value.toString();
     });
   });
 
-  // Save defaults if they didn't exist
-  if (!auditParameters) {
-    chrome.storage.local.set({ auditParameters: defaults });
-  }
+  // Initialize display form
+  const display = auditDisplay || { colors: defaultColors, showScore: true };
+  Object.entries(display.colors).forEach(([key, rgb]) => {
+    const input = document.querySelector<HTMLInputElement>(`[name="color_${key}"]`);
+    if (input) input.value = rgbToHex(rgb);
+  });
+  (document.querySelector('[name="show_score"]') as HTMLInputElement).checked = display.showScore;
 
-  paramsForm.addEventListener("submit", (e) => {
+  // Set defaults if missing
+  if (!auditParameters) chrome.storage.local.set({ auditParameters: defaultParams });
+  if (!auditDisplay) chrome.storage.local.set({ auditDisplay: { colors: defaultColors, showScore: true } });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await initialize();
+
+  // OAuth Form Handler
+  document.getElementById('oauthForm')!.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const formData = new FormData(paramsForm);
+    const statusElement = document.getElementById('oauthStatus')!;
+    statusElement.textContent = '...';
+    statusElement.style.color = '#aaaeb1';
+
+    const clientId = (document.querySelector('[name="clientId"]') as HTMLInputElement).value;
+    const clientSecret = (document.querySelector('[name="clientSecret"]') as HTMLInputElement).value;
+
+    await chrome.storage.local.set({ auditOAuth: { clientId, clientSecret } });
+
+    const {valid} = await chrome.runtime.sendMessage({ action: 'checkAuth' });
+    statusElement.textContent = valid ? 'success' : 'invalid';
+    statusElement.style.color = valid ? '#28a745' : '#ff4444';
+  });
+
+  // Parameters Form Handler
+  document.getElementById('paramsForm')!.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
     
-    // Build parameters object with proper typing
-    const parameters = Object.keys(defaults).reduce((acc, name) => {
-      const getNumber = (field: keyof Param) => {
-        const value = formData.get(`${name}_${field}`);
-        return Number(value) || 0;  // Convert to number, fallback to 0
-      };
-  
-      acc[name] = {
-        weight: getNumber("weight"),
-        midpoint: getNumber("midpoint"),
-        steepness: getNumber("steepness"),
-      };
-      return acc;
-    }, {} as Params);
-  
-    // Save to storage
+    const parameters = Object.keys(defaultParams).reduce((acc, name) => ({
+      ...acc,
+      [name]: {
+        weight: Number(formData.get(`${name}_weight`)),
+        midpoint: Number(formData.get(`${name}_midpoint`)),
+        steepness: Number(formData.get(`${name}_steepness`))
+      }
+    }), {} as Params);
+
     chrome.storage.local.set({ auditParameters: parameters });
   });
 
-  oauthForm.addEventListener("submit", async function (e) {
+  // Display Form Handler
+  document.getElementById('displayForm')!.addEventListener('submit', (e) => {
     e.preventDefault();
-    const statusElement = document.getElementById(
-      "oauthStatus"
-    ) as HTMLSpanElement;
+    const formData = new FormData(e.target as HTMLFormElement);
+    
+    const colors = Object.keys(defaultColors).reduce((acc, key) => ({
+      ...acc,
+      [key]: hexToRgb(formData.get(`color_${key}`) as string)
+    }), {} as Colors);
 
-    statusElement.textContent = "...";
-    statusElement.style.color = "#aaaeb1";
+    const display: Display = {
+      colors,
+      showScore: formData.get('show_score') === 'on'
+    };
 
-    chrome.storage.local.set({
-        auditOAuth: {
-          clientId: clientIdInput.value,
-          clientSecret: clientSecretInput.value,
-        },
+    chrome.storage.local.set({ auditDisplay: display });
+  });
+
+  // Reset Buttons
+  document.getElementById('resetParams')!.addEventListener('click', () => {
+    Object.entries(defaultParams).forEach(([name, values]) => {
+      Object.entries(values).forEach(([key, value]) => {
+        const input = document.querySelector<HTMLInputElement>(`[name="${name}_${key}"]`);
+        if (input) input.value = value.toString();
+      });
     });
+    chrome.storage.local.set({ auditParameters: defaultParams });
+  });
 
+  document.getElementById('resetDisplay')!.addEventListener('click', () => {
+    Object.entries(defaultColors).forEach(([key, rgb]) => {
+      const input = document.querySelector<HTMLInputElement>(`[name="color_${key}"]`);
+      if (input) input.value = rgbToHex(rgb);
+    });
+    (document.querySelector('[name="show_score"]') as HTMLInputElement).checked = true;
+    chrome.storage.local.set({ auditDisplay: { colors: defaultColors, showScore: true } });
+  });
 
-    const result = await chrome.runtime.sendMessage({ action: "checkAuth" });
-    if (!result.valid) {
-      statusElement.style.color = "#ff4444";
-      statusElement.textContent = "Invalid credentials";
-      return;
-    }
+  // Copy Callback URL
+  document.getElementById('copy')!.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const id = chrome.runtime.id;
+    await navigator.clipboard.writeText(`https://${id}.chromiumapp.org/`);
+  });
 
-    // Show success message
-    statusElement.style.color = "#4BB543";
-    statusElement.textContent = "Success";
-
+  // Clear Scores
+  document.getElementById('clearScores')!.addEventListener('click', () => {
+    chrome.storage.local.get(null, (items) => {
+      const keysToRemove = Object.keys(items)
+        .filter(key => key.startsWith('audit_'))
+        .filter(key => key !== 'auditParameters' && key !== 'auditDisplay' && key !== 'auditOAuth');
+      chrome.storage.local.remove(keysToRemove);
+    });
+    chrome.runtime.sendMessage({ action: 'clearScores' });
   });
 });

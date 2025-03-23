@@ -2,27 +2,37 @@ import * as osu from "osu-api-v2-js";
 import {calculateScore } from "./score";
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  
   if (request.action === "checkAuth") {
     (async () => {
-      try {
-        const result = await chrome.storage.local.get('auditOAuth');
-        const auditOAuth = result.auditOAuth;
+      const setErrorBadge = () => {
+        chrome.action.setBadgeText({ text: "!" });
+        chrome.action.setBadgeBackgroundColor({ color: "#FF0000" });
+      };
   
-        if (!auditOAuth?.clientId || !auditOAuth?.clientSecret) {
-          sendResponse({ valid: false });
-          return;
-        }
-        
+      const setValidBadge = () => {
+        chrome.action.setBadgeText({ text: "" });
+        chrome.action.setBadgeBackgroundColor({ color: "#000000" });
+      };
+  
+      try {
+        const { auditOAuth } = await chrome.storage.local.get('auditOAuth');
+        const isValid = auditOAuth?.clientId && auditOAuth?.clientSecret;
+  
+        if (!isValid) throw new Error('Missing credentials');
+  
         await osu.API.createAsync(
           Number(auditOAuth.clientId),
           auditOAuth.clientSecret
         );
+        
         sendResponse({ valid: true });
+        setValidBadge();
       } catch (error) {
         sendResponse({ valid: false });
+        setErrorBadge();
       }
     })();
-    
     return true;
   }
 
@@ -83,14 +93,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     
     return true;
   }
-
-  if(request.action === "missingOAuth") {
-    chrome.action.setBadgeText({
-      text: "!"
-    });
-    chrome.action.setBadgeBackgroundColor({
-      color: "#FF0000"
-    });
-  }
 });
 
+// Reinitialize content script on history state update. Handles SPA navigation.
+chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+  chrome.tabs.sendMessage(details.tabId, { action: 'reinitialize' });
+});
