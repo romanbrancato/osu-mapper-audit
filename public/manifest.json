@@ -1,6 +1,6 @@
 {
   "name": "osu! mapper audit",
-  "description": "Allows you to quickly estimate a users' mapping proficiency.",
+  "description": "A highly customizable tool that allows a user to quickly estimate a mapper's proficiency.",
   "version": "1.0",
   "manifest_version": 3,
   
